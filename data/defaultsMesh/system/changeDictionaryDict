@@ -1,3 +1,6 @@
+%{%(MeshUtility%)
+%:cfMesh
+%:default
 %{%(TwoDSettings/ConvertTo2D%)
 %:True
 %[_header%]
@@ -26,4 +29,5 @@ boundary
 }
 
 // ************************************************************************* //
+%}
 %}

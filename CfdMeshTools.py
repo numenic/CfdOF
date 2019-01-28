@@ -459,21 +459,23 @@ class CfdMeshTools:
             with open(self.temp_file_geo, 'w') as fullMeshFile:
                 for (i, objFaces) in enumerate(self.part_obj.Shape.Faces):
                     faceName = ("face{}".format(i))
-                    mesh_stl = MeshPart.meshFromShape(objFaces, LinearDeflection=self.mesh_obj.STLLinearDeflection)
-                    fullMeshFile.write("solid {}\n".format(faceName))
-                    for face in mesh_stl.Facets:
-                        n = face.Normal
-                        fullMeshFile.write(" facet normal {} {} {}\n".format(n[0], n[1], n[2]))
-                        fullMeshFile.write("  outer loop\n")
-                        for j in range(3):
-                            p = face.Points[j]
-                            fullMeshFile.write("    vertex {} {} {}".format(self.scale*p[0],
-                                                                            self.scale*p[1],
-                                                                            self.scale*p[2]))
-                            fullMeshFile.write("\n")
-                        fullMeshFile.write("  endloop\n")
-                        fullMeshFile.write(" endfacet\n")
-                    fullMeshFile.write("endsolid {}\n".format(faceName))
+                    if (self.mesh_obj.MeshUtility != 'cfMesh' or
+                            faceName not in self.two_d_settings['FrontFaceList'] + self.two_d_settings['BackFaceList']):
+                        mesh_stl = MeshPart.meshFromShape(objFaces, LinearDeflection=self.mesh_obj.STLLinearDeflection)
+                        fullMeshFile.write("solid {}\n".format(faceName))
+                        for face in mesh_stl.Facets:
+                            n = face.Normal
+                            fullMeshFile.write(" facet normal {} {} {}\n".format(n[0], n[1], n[2]))
+                            fullMeshFile.write("  outer loop\n")
+                            for j in range(3):
+                                p = face.Points[j]
+                                fullMeshFile.write("    vertex {} {} {}".format(self.scale*p[0],
+                                                                                self.scale*p[1],
+                                                                                self.scale*p[2]))
+                                fullMeshFile.write("\n")
+                            fullMeshFile.write("  endloop\n")
+                            fullMeshFile.write(" endfacet\n")
+                        fullMeshFile.write("endsolid {}\n".format(faceName))
 
     def read_and_set_new_mesh(self):
         if not self.error:

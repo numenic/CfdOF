@@ -32,7 +32,12 @@ source "%(TranslatedFoamPath%)/etc/bashrc"
 %:cfMesh
 # Extract feature edges
 runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry.stl" "%(Name%)_Geometry.fms"
+%{%(TwoDSettings/ConvertTo2D%)
+%:True
+runCommand cartesian2DMesh
+%:default
 runCommand cartesianMesh
+%}
 %:snappyHexMesh
 runCommand blockMesh
 runCommand surfaceFeatureExtract
@@ -47,17 +52,22 @@ runCommand snappyHexMesh -overwrite
 %}
 
 runCommand surfaceToPatch "constant/triSurface/%(Name%)_Geometry.stl"
+
 %:gmsh
 runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 runCommand transformPoints -scale "(0.001 0.001 0.001)"
 
 %}
+%{%(MeshUtility%)
+%:cfMesh
+%:default
 %{%(TwoDSettings/ConvertTo2D%)
 %:True
 runCommand changeDictionary
 runCommand flattenMesh
 runCommand extrudeMesh
 
+%}
 %}
 runCommand surfaceMeshTriangulate mesh_outside.stl
 runCommand surfaceTransformPoints -scale "(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
