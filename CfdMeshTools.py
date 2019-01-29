@@ -152,6 +152,7 @@ class CfdMeshTools:
                            abs(frontObj.Shape.Area) > 0 and \
                            abs(frontObj.Shape.Area - backObj.Shape.Area)/abs(frontObj.Shape.Area) < 1e-6:
                             self.two_d_settings['Distance'] = fShape.distToShape(bShape)[0]/1000
+                            self.two_d_settings['Normal'] = (A1.x, A1.y, A1.z)
                         else:
                             raise RuntimeError("2D bounding planes do not match up.")
                     else:

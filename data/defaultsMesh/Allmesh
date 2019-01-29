@@ -30,12 +30,14 @@ source "%(TranslatedFoamPath%)/etc/bashrc"
 %}
 %{%(MeshUtility%)
 %:cfMesh
-# Extract feature edges
-runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry.stl" "%(Name%)_Geometry.fms"
 %{%(TwoDSettings/ConvertTo2D%)
 %:True
+runCommand surfaceTransformPoints -rotate "( ( %(TwoDSettings/Normal%) ) ( 0 0 1 ) )" "constant/triSurface/%(Name%)_Geometry.stl" "constant/triSurface/%(Name%)_Geometry_Rotated.stl"
+runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry_Rotated.stl" "%(Name%)_Geometry.fms"
 runCommand cartesian2DMesh
 %:default
+# Extract feature edges
+runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry.stl" "%(Name%)_Geometry.fms"
 runCommand cartesianMesh
 %}
 %:snappyHexMesh
