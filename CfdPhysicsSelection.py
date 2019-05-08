@@ -1,6 +1,7 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2017-2018                                               *
+# *   Copyright (c) 2019 - Oliver Oxtoby <oliveroxtoby@gmail.com>           *
+# *   Copyright (c) 2017-2018:                                              *
 # *   Alfred Bogaers (CSIR) <abogaers@csir.co.za>                           *
 # *   Johan Heyns (CSIR) <jheyns@csir.co.za>                                *
 # *   Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>                             *
@@ -32,11 +33,10 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
     import FemGui
 import CfdTools
-from femcommands.manager import CommandManager
 
 
 def makeCfdPhysicsSelection(name="PhysicsModel"):
-    obj = FreeCAD.ActiveDocument.addObject("App::FeaturePython", name)
+    obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectPython", name)
     _CfdPhysicsModel(obj)
 
     if FreeCAD.GuiUp:
@@ -44,31 +44,34 @@ def makeCfdPhysicsSelection(name="PhysicsModel"):
     return obj
 
 
-class _CommandCfdPhysicsSelection(CommandManager):
+class _CommandCfdPhysicsSelection:
     """ CFD physics selection command definition """
-    def __init__(self):
-        super(_CommandCfdPhysicsSelection, self).__init__()
+
+    def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "physics.png")
-        self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select models"),
-                          'Accel': "",
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select the physics model")}
-        self.is_active = 'with_analysis'
+        return {'Pixmap': icon_path,
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select models"),
+                'Accel': "",
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select the physics model")}
+
+    def IsActive(self):
+        return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Choose appropriate physics model")
         isPresent = False
-        members = FemGui.getActiveAnalysis().Group
+        members = CfdTools.getActiveAnalysis().Group
         for i in members:
-            if "PhysicsModel" in i.Name:
+            if isinstance(i.Proxy, _CfdPhysicsModel):
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
                 isPresent = True
 
         # Allow to re-create if deleted
         if not isPresent:
             FreeCADGui.addModule("CfdPhysicsSelection")
-            FreeCADGui.addModule("FemGui")
-            FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
+            FreeCADGui.addModule("CfdTools")
+            FreeCADGui.doCommand(
+                "CfdTools.getActiveAnalysis().addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
@@ -130,7 +133,7 @@ class _CfdPhysicsModel:
 
         if 'Turbulence' not in obj.PropertiesList:
             obj.addProperty("App::PropertyEnumeration", "Turbulence", "Physics modelling",
-                        "Type of turbulence modelling")
+                            "Type of turbulence modelling")
             obj.Turbulence = ['Inviscid', 'Laminar', 'RANS']
             obj.Turbulence = 'Laminar'
 
@@ -152,8 +155,8 @@ class _CfdPhysicsModel:
                             "Gravitational acceleration vector (z component)")
             obj.gz = '0 m/s^2'
 
-    def execute(self, obj):
-        return
+    def onDocumentRestored(self, obj):
+        self.initProperties(obj)
 
 
 class _ViewProviderPhysicsSelection:

@@ -42,6 +42,7 @@ import Fem
 from FreeCAD import Units
 import CfdConsoleProcess
 import Part
+from CfdAnalysis import _CfdAnalysis
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -1089,3 +1090,18 @@ def matchFacesToTargetShape(ref_lists, shape):
 
     return successful_candidates
 
+
+def setActiveAnalysis(analysis):
+    for obj in FreeCAD.ActiveDocument.Objects:
+        if isinstance(obj.Proxy, _CfdAnalysis):
+            obj.active = False
+
+    analysis.active = True
+
+
+def getActiveAnalysis():
+    for obj in FreeCAD.ActiveDocument.Objects:
+        if isinstance(obj.Proxy, _CfdAnalysis):
+            if obj.active:
+                return obj
+    return None
