@@ -24,11 +24,6 @@
 # **************************************************************************/
 
 
-__title__ = "cfd analysis workbench"
-__author__ = "qingfeng xia"
-__url__ = "http://www.freecadweb.org"
-
-
 class CfdOFWorkbench(Workbench):
     """ CfdOF workbench object """
     def __init__(self):
@@ -52,7 +47,7 @@ class CfdOFWorkbench(Workbench):
         import Fem
         import FemGui
 
-        import _CommandCfdAnalysis
+        import CfdAnalysis
         import CfdPhysicsSelection
         import CfdFluidMaterial
         import _CommandCfdSolverFoam

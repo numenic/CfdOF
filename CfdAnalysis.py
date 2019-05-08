@@ -36,8 +36,8 @@ if FreeCAD.GuiUp:
 def makeCfdAnalysis(name):
     """ Create a Cfd Analysis group object """
     obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
-    obj.active = False
     _CfdAnalysis(obj)
+    obj.Proxy.active = False
 
     if FreeCAD.GuiUp:
         _ViewProviderCfdAnalysis(obj.ViewObject)
@@ -46,6 +46,8 @@ def makeCfdAnalysis(name):
 
 class _CommandCfdAnalysis:
     """ The Cfd_Analysis command definition """
+    def __init__(self):
+        pass
 
     def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.png")
@@ -60,6 +62,7 @@ class _CommandCfdAnalysis:
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CFD Analysis")
         FreeCADGui.addModule("CfdAnalysis")
+        FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')")
         FreeCADGui.doCommand("CfdTools.setActiveAnalysis(analysis)")
 
