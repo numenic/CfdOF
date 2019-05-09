@@ -27,6 +27,7 @@
 import FreeCAD
 import CfdTools
 import os
+from _CfdAnalysis import _CfdAnalysis
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -93,21 +94,6 @@ class _CommandCfdAnalysis:
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
-
-
-class _CfdAnalysis:
-    """ The CFD analysis group """
-    def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "CfdAnalysis"
-        self.initProperties(obj)
-
-    def initProperties(self, obj):
-        if 'OutputPath' not in obj.PropertiesList:
-            obj.addProperty("App::PropertyPath", "OutputPath", "Path to write cases to (blank to use system default)")
-
-    def onDocumentRestored(self, obj):
-        self.initProperties(obj)
 
 
 class _ViewProviderCfdAnalysis:

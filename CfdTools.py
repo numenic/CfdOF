@@ -42,6 +42,7 @@ import Fem
 from FreeCAD import Units
 import CfdConsoleProcess
 import Part
+from _CfdAnalysis import _CfdAnalysis
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -95,7 +96,7 @@ if FreeCAD.GuiUp:
 def getParentAnalysisObject(obj):
     """ Return CfdAnalysis object to which this obj belongs in the tree """
     for o in FreeCAD.activeDocument().Objects:
-        if o.Name.startswith("CfdAnalysis"):
+        if hasattr(o, "Proxy") and isinstance(o.Proxy, _CfdAnalysis):
             if obj in o.Group:
                 return o
     return None
@@ -1092,7 +1093,7 @@ def matchFacesToTargetShape(ref_lists, shape):
 
 def setActiveAnalysis(analysis):
     for obj in FreeCAD.ActiveDocument.Objects:
-        if obj.Proxy.Type == "CfdAnalysis":
+        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdAnalysis):
             obj.Proxy.active = False
 
     analysis.Proxy.active = True
@@ -1100,7 +1101,7 @@ def setActiveAnalysis(analysis):
 
 def getActiveAnalysis():
     for obj in FreeCAD.ActiveDocument.Objects:
-        if obj.Proxy.Type == "CfdAnalysis":
+        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdAnalysis):
             if obj.Proxy.active:
                 return obj
     return None
